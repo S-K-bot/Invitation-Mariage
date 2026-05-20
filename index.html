@@ -46,29 +46,25 @@
    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0s linear 0.3s, z-index 0.1s step-end 0.3s;
  }
 
- /* CORRECTIF TOTAL TRANSPARENCE : Face avant 100% opaque avec texture Canson Gaufré */
  .front-face { 
    position: absolute; 
    top: 0; 
    left: 0; 
    width: 100%; 
    height: 100%; 
-   background-color: #ffffff !important; /* Opaque blanc pur */
+   background-color: #ffffff !important; 
    z-index: 3; 
    display: flex; 
    flex-direction: column; 
-   /* Simulation texture papier Canson lourd pressé */
    box-shadow: inset 0 0 25px rgba(0,0,0,0.03), inset 0 0 0 3px rgba(255,255,255,1), inset 0 0 0 4px rgba(0,0,0,0.02);
  }
  
- /* Conteneur de l'illustration ajusté pour bloquer la transparence */
  .envelope-art { 
    width: 100%; 
    height: 65%; 
    overflow: hidden; 
    position: relative; 
    background-color: #ffffff; 
-   /* Découpe vectorielle au ras du dessin pour ne pas rendre le bas transparent */
    clip-path: inset(0 0 0 0); 
  }
  .envelope-art img { 
@@ -196,19 +192,24 @@
  </style>
 </head>
 <body>
+
+ <!-- BALISE AUDIO AJOUTÉE POUR LE MORCEAU DE VIOLON (MARIA BASSIL) -->
+ <audio id="bgMusic" loop>
+   <source src="https://githubusercontent.com" type="audio/mpeg">
+   <source src="https://githubusercontent.com" type="audio/ogg">
+ </audio>
+
  <div class="envelope-wrapper" id="envelopeContainer">
  <div class="envelope" id="envelopeBody">
    <div class="envelope-back"></div>
    <div class="flap"></div>
    <div class="card">
    <div class="card-image-part">
-     <!-- LIEN PERSONNEL 1 VERROUILLÉ -->
      <img src="https://i.ibb.co/6c5bjG1Y/S-K-Invitation.png" alt="Invitation Mariage" id="invitationImg">
    </div>
    </div>
    <div class="front-face">
    <div class="envelope-art">
-     <!-- LIEN PERSONNEL 2 VERROUILLÉ -->
      <img src="https://i.ibb.co/N690yZLr/face-enveloppe.jpg" alt="Illustration Cote Gammarth">
    </div>
    <div class="recipient-box">
@@ -217,7 +218,7 @@
        <button class="action-btn maps-btn" id="mapsButton">
          <svg viewBox="0 0 24 24" xmlns="http://w3.org">
            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#EA4335"/>
-         </svg>Google Map
+         </svg> Google Maps
        </button>
        <button class="action-btn calendar-btn" id="calendarBtn">📅 Enregistrer la date</button>
      </div>
@@ -233,6 +234,8 @@
  const mapsButton = document.getElementById('mapsButton');
  const recipientElement = document.getElementById('recipientName');
  const calendarButton = document.getElementById('calendarBtn');
+ const audio = document.getElementById('bgMusic'); // Variable audio liée
+
  try {
  const currentUrl = window.location.href;
  const urlParams = new URLSearchParams(window.location.search || currentUrl.split('?')[1]);
@@ -244,11 +247,12 @@
  }
  if (guestName) {
  const decodedName = decodeURIComponent(guestName);
- recipientElement.innerText = "إلى " + decodedName.replace(/_/g, ' ');
+ recipientElement.innerText = " " + decodedName.replace(/_/g, ' ');
  }
  } catch(e) {
  console.log("Erreur d'URL");
  }
+
  function activateEnvelope() {
  wrapper.classList.add('ready');
  }
@@ -257,59 +261,65 @@
  } else {
  img.addEventListener('load', activateEnvelope);
  }
+
  wrapper.addEventListener('click', (event) => {
  if (event.target === mapsButton || event.target === calendarButton) return;
  if (!wrapper.classList.contains('open')) {
  wrapper.classList.add('open');
- setTimeout(() => { envelopeBody.classList.add('reveal-card'); }, 400); 
- setTimeout(() => { card.classList.add('settle'); }, 2100); 
  
- setTimeout(() => { 
-   mapsButton.classList.add('show');
-   calendarButton.classList.add('show'); 
+ // Lancement de la musique de Maria Bassil au moment de l'ouverture
+ audio.play().catch(err => console.log("Lecture audio bloquée ou fichier manquant :", err));
+
+ setTimeout(() => { envelopeBody.classList.add('reveal-card'); }, 400);
+ setTimeout(() => { card.classList.add('settle'); }, 2100);
+ setTimeout(() => {
+ mapsButton.classList.add('show');
+ calendarButton.classList.add('show');
  }, 2500);
  } else {
  mapsButton.classList.remove('show');
- calendarButton.classList.remove('show'); 
+ calendarButton.classList.remove('show');
  card.classList.remove('settle');
+ 
+ // Optionnel : Pause l'audio si l'utilisateur décide de refermer l'enveloppe
+ audio.pause();
+
  setTimeout(() => {
-   wrapper.classList.remove('open');
-   envelopeBody.classList.remove('reveal-card');
+ wrapper.classList.remove('open');
+ envelopeBody.classList.remove('reveal-card');
  }, 200);
  }
  });
- 
+
  mapsButton.addEventListener('click', (event) => {
  event.stopPropagation();
- /* LIEN PERSONNEL 3 VERROUILLÉ */
  const absoluteWebUrl = "https://maps.app.goo.gl/fRxRzG4eXCShHXqs9";
  window.open(absoluteWebUrl, '_blank');
  });
 
  calendarButton.addEventListener('click', (e) => {
-   e.stopPropagation();
-   const icsContent = [
-     "BEGIN:VCALENDAR",
-     "VERSION:2.0",
-     "BEGIN:VEVENT",
-     "UID:" + Date.now() + "@mariage.com",
-     "DTSTAMP:20260517T120000Z",
-     "DTSTART:20260822T173000Z", 
-     "DTEND:20260822T200000Z",
-     "SUMMARY:Mariage de Sami & Khadija 💍",
-     "DESCRIPTION:Célébration du mariage à l'hôtel Golden Carthage Gammarth.",
-     "LOCATION:Golden Carthage Gammarth, Tunisie",
-     "END:VEVENT",
-     "END:VCALENDAR"
-   ].join("\r\n");
-
-   const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8;" });
-   const link = document.createElement("a");
-   link.href = window.URL.createObjectURL(blob);
-   link.setAttribute("download", "Mariage_Sami_Khadija.ics");
-   document.body.appendChild(link);
-   link.click();
-   document.body.removeChild(link);
+ e.stopPropagation();
+ const icsContent = [
+ "BEGIN:VCALENDAR",
+ "VERSION:2.0",
+ "BEGIN:VEVENT",
+ "UID:" + Date.now() + "@mariage.com",
+ "DTSTAMP:20260517T120000Z",
+ "DTSTART:20260822T173000Z",
+ "DTEND:20260822T200000Z",
+ "SUMMARY:Mariage de Sami & Khadija 💍",
+ "DESCRIPTION:Célébration du mariage à l'hôtel Golden Carthage Gammarth.",
+ "LOCATION:Golden Carthage Gammarth, Tunisie",
+ "END:VEVENT",
+ "END:VCALENDAR"
+ ].join("\r\n");
+ const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8;" });
+ const link = document.createElement("a");
+ link.href = window.URL.createObjectURL(blob);
+ link.setAttribute("download", "Mariage_Sami_Khadija.ics");
+ document.body.appendChild(link);
+ link.click();
+ document.body.removeChild(link);
  });
  </script>
 </body>
